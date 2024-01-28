@@ -15,6 +15,7 @@ def save_tournaments(tournaments_df): #Takes a df of tournament results and save
 
 def get_tops():
     tops = src.scraping.get_tops()
+    print(tops)
 
 def save_tops(tops_df):
     pass

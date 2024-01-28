@@ -32,25 +32,51 @@ def get_tops():
     resp = requests.get(f'{TOURNAMENT_PATH}{test_slug}', headers=HEADERS)
     soup = bs.BeautifulSoup(resp.text, features='lxml')
     tables =  soup.findAll('div', {'id': 'tournament_table'})
-    parse_tops(list(tables)[0])
+    tops = parse_tops(list(tables)[0], slugs_df.id[29], slugs_df.slug[29])
 
-    return tournaments
+    return tops
 
-def parse_tops(div):
-    rows = {}
+def parse_tops(div, id, slug):
+    rows = []
     tags_count = 0 #used to index the header as well as assign placements!
-    for child in div.children:
+    for child in div.children: #loop through rows
         if type(child) == bs.element.Tag:
             row = {}
             #child.attrs contains refrence to deck link
             if tags_count == 0: #the first tag should always be the header, we dont need the header because we will be using a slightly different format
                 tags_count += 1
+                continue
             else:
                 if 'href' in child.attrs.keys():
                     href = child.attrs['href']
-                    print(href)
+                    #print(href)
                 else:
-                    print(None)
+                    href = None
+                    #print(None)
+            index = 0
+            for c in child.children: # Get other rows in [Rank, Country, Duelist, Archetype, Sub-Archetype1, Sub-Archetype2, Price]
+                if type(c) == bs.element.Tag:
+                    if index == 0: #Get the Rank
+                        #print(c.text)
+                        rank = c.text
+                    if index == 1: # Get the Country and Duelist
+                        text_list = c.text.split('\n')
+                        text_list = list(filter(None, text_list))
+                        country = text_list[0]
+                        duelist = text_list[1]
+                    if index == 2:# Get the Archetypes (This is multiple children, only the first one has text, the rest are in the title of the the img tag (secondary and tirtiary))
+                        for i in c.children:
+                            pass
+                    if index == 3:# Get the Price
+                        price = c.text.replace('\n','')
+                
+                    index += 1
+    
+            row = {'id': id, 'slug': slug, 'href': href, 'rank': rank, 'country': country, 'duelist': duelist, 'archetype': '', 'sub-archetype1': '', 'sub-archetype2' : '', 'price': price}
+            rows.append(row)
+                        
+    
+    return rows
 
 
 def get_lists(req):
