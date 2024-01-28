@@ -14,7 +14,7 @@ def save_tournaments(tournaments_df): #Takes a df of tournament results and save
     tournaments_df.to_csv(path)
 
 def get_tops():
-    pass
+    tops = src.scraping.get_tops()
 
 def save_tops(tops_df):
     pass
